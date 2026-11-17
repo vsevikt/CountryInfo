@@ -1,0 +1,100 @@
+{% extends 'main/layout.html' %}
+{% block title %}Atlas — Countries and regions{% endblock %}
+{% block content %}
+<div class="minimal-app" id="top">
+    <header class="minimal-header">
+        <a class="brand" href="{% url 'home' %}" aria-label="Atlas home">
+            <span class="brand-mark">A</span>
+            <span>atlas<span class="brand-dot">.</span></span>
+        </a>
+        <span class="header-caption">WORLD EXPLORER</span>
+    </header>
+
+    <main class="minimal-main directory-main">
+        <section class="hero">
+            <h1>Explore the world<span class="period">.</span></h1>
+            <p class="hero-copy">Browse countries, regions and the languages spoken around the world.</p>
+        </section>
+
+        <section class="directory">
+            <nav class="directory-tabs" aria-label="Browse information">
+                <a class="directory-tab {% if active_view == 'countries' %}active{% endif %}" href="?view=countries">All countries</a>
+                <a class="directory-tab {% if active_view == 'regions' %}active{% endif %}" href="?view=regions">Regions</a>
+                <a class="directory-tab {% if active_view == 'languages' %}active{% endif %}" href="?view=languages">Languages</a>
+            </nav>
+
+            <form class="directory-search" method="get" action="{% url 'home' %}">
+                <input type="hidden" name="view" value="{{ active_view }}">
+                <label class="visually-hidden" for="directory-query">Search {{ active_view }}</label>
+                <input id="directory-query" type="search" name="q" value="{{ search_query }}" placeholder="{{ search_placeholder }}">
+                <button type="submit">Search</button>
+                {% if search_query %}<a href="{{ clear_search_url }}">Clear</a>{% endif %}
+            </form>
+
+            <div class="directory-heading">
+                <div>
+                    <span class="section-kicker">{{ active_view|upper }}</span>
+                    <h2>{{ page_title|default:'Countries' }}</h2>
+                </div>
+                {% if catalog_items %}<span class="result-count">{{ catalog_items|length }}</span>{% endif %}
+                {% if country_items %}<span class="result-count">{{ country_items|length }} countries</span>{% endif %}
+            </div>
+
+            {% if error %}
+                <p class="directory-message error-state">{{ error }}</p>
+            {% elif selected_country %}
+                <a class="directory-back" href="{{ back_url }}">← Back to {{ active_view }}</a>
+                <section class="country-detail">
+                    <div class="detail-heading">
+                        <h3>{{ detail_title }}</h3>
+                        <p>{{ detail_subtitle }}</p>
+                    </div>
+                    <dl class="detail-facts">
+                        {% if capital_detail %}
+                            <div><dt>Country</dt><dd>{{ selected_country.name }}</dd></div>
+                        {% else %}
+                            <div>
+                                <dt>Capital</dt>
+                                <dd>
+                                    {% if capital_url %}<a href="{{ capital_url }}">{{ selected_country.capital }}</a>
+                                    {% else %}{{ selected_country.capital }}{% endif %}
+                                </dd>
+                            </div>
+                        {% endif %}
+                        <div><dt>Region</dt><dd>{{ selected_country.region }}</dd></div>
+                        <div><dt>Languages</dt><dd>{{ selected_country.languages }}</dd></div>
+                        <div><dt>Currencies</dt><dd>{{ selected_country.currencies }}</dd></div>
+                        <div><dt>Population</dt><dd>{{ selected_country.population }}</dd></div>
+                        <div><dt>Area</dt><dd>{{ selected_country.area }}</dd></div>
+                        <div><dt>Country code</dt><dd>{{ selected_country.alpha2Code }} / {{ selected_country.alpha3Code }}</dd></div>
+                        <div><dt>Time zones</dt><dd>{{ selected_country.timezones }}</dd></div>
+                    </dl>
+                </section>
+            {% elif country_items %}
+                <a class="directory-back" href="{{ back_url }}">← Back to {{ active_view }}</a>
+                <div class="directory-list">
+                    {% for item in country_items %}
+                        <a class="directory-item" href="{{ item.url }}">
+                            <span>{{ item.name }}</span>
+                            <small>{{ item.subtitle }}</small>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% elif catalog_items %}
+                <div class="directory-list">
+                    {% for item in catalog_items %}
+                        <a class="directory-item" href="{{ item.url }}">
+                            <span>{{ item.name }}</span>
+                            {% if item.count %}<small>{{ item.count }} countries</small>{% elif item.subtitle %}<small>{{ item.subtitle }}</small>{% endif %}
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="directory-message">No data found.</p>
+            {% endif %}
+        </section>
+    </main>
+
+    <footer class="minimal-footer">Atlas <span>·</span> Country information from Countrylayer</footer>
+</div>
+{% endblock %}
